@@ -26,10 +26,23 @@ namespace SharpGrep
 				string? line;
 				while ((line = Console.In.ReadLine()) != null)
 				{
-					if (matcher.IsMatch(line))
+					if (!options.OnlyMatches)
 					{
-						Console.WriteLine(line);
-						matchesPattern = true;
+						if (matcher.IsMatch(line))
+						{
+							Console.WriteLine(line);
+							matchesPattern = true;
+						}
+					}
+					else
+					{
+						var matches = new List<(int start, int length)>();
+						matcher.CollectMatches(line, matches);
+						foreach (var match in matches)
+						{
+							Console.WriteLine(line.Substring(match.start, match.length));
+							matchesPattern = true;
+						}
 					}
 				}
 			}
@@ -48,17 +61,37 @@ namespace SharpGrep
 							string? line;
 							while ((line = reader.ReadLine()) != null)
 							{
-								if (matcher.IsMatch(line))
+								if (!options.OnlyMatches)
 								{
-									if (multipleFiles)
+									if (matcher.IsMatch(line))
 									{
-										Console.WriteLine($"{filePath}:{line}");
+										if (multipleFiles)
+										{
+											Console.WriteLine($"{filePath}:{line}");
+										}
+										else
+										{
+											Console.WriteLine(line);
+										}
+										matchesPattern = true;
 									}
-									else
+								}
+								else
+								{
+									var matches = new List<(int start, int length)>();
+									matcher.CollectMatches(line, matches);
+									foreach (var match in matches)
 									{
-										Console.WriteLine(line);
+										if (multipleFiles)
+										{
+											Console.WriteLine($"{filePath}:{line.Substring(match.start, match.length)}");
+										}
+										else
+										{
+											Console.WriteLine(line.Substring(match.start, match.length));
+										}
+										matchesPattern = true;
 									}
-									matchesPattern = true;
 								}
 							}
 

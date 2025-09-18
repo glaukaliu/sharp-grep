@@ -28,5 +28,12 @@ namespace SharpGrep
 			return regex.IsMatch(input);
 		}
 
+		public void CollectMatches(string input, List<(int start, int length)> matches)
+		{
+			foreach (Match match in regex.Matches(input))
+			{
+				matches.Add((match.Index, match.Length));
+			}
+		}
 	}
 }
