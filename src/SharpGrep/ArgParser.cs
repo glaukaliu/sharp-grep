@@ -32,21 +32,24 @@ namespace SharpGrep
 						onlyMatches = true;
 						break;
 					case "-A":
-						if (args.Length == 0 || !int.TryParse(args[0], out after))
+						if (args.Length == 0 || !int.TryParse(args[0], out after) || after < 0)
+						{
+							throw new ArgumentException("Missing or invalid number for -A option.");
+						}
 						{
 							throw new ArgumentException("Missing or invalid number for -A option.");
 						}
 						args = args[1..];
 						break;
 					case "-B":
-						if (args.Length == 0 || !int.TryParse(args[0], out before))
+						if (args.Length == 0 || !int.TryParse(args[0], out before) || before < 0)
 						{
 							throw new ArgumentException("Missing or invalid number for -B option.");
 						}
 						args = args[1..];
 						break;
 					case "-C":
-						if (args.Length == 0 || !int.TryParse(args[0], out int context))
+						if (args.Length == 0 || !int.TryParse(args[0], out int context) || context < 0)
 						{
 							throw new ArgumentException("Missing or invalid number for -C option.");
 						}

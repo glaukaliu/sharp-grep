@@ -21,35 +21,85 @@ namespace SharpGrep
 			var matcher = new RegexMatcher(options.Pattern, options.IgnoreCase, options.WholeWord);
 
 			bool matchesPattern = false;
+			
 			if (options.Inputs.Length == 0)
 			{
+				//  ---------- STANDARD INPUT ----------
 				string? line;
+
+				Context beforeContext = new Context(options.Before);
+				int remainingAfter = 0;
+
 				while ((line = Console.In.ReadLine()) != null)
 				{
 					if (!options.OnlyMatches)
 					{
 						if (matcher.IsMatch(line))
 						{
+							foreach (string beforeContextLine in beforeContext.GetLines())
+							{
+								Console.WriteLine(beforeContextLine);
+							}
+							beforeContext.Clear();
+
 							Console.WriteLine(line);
 							matchesPattern = true;
+							remainingAfter = options.After;
+						}
+						else
+						{
+							if (remainingAfter > 0)
+							{
+								Console.WriteLine(line);
+								remainingAfter--;
+							}
+							else if (options.Before > 0)
+							{
+								beforeContext.AddLine(line);
+							}
 						}
 					}
 					else
 					{
 						var matches = new List<(int start, int length)>();
 						matcher.CollectMatches(line, matches);
-						foreach (var match in matches)
+						if (matches.Count > 0)
 						{
-							Console.WriteLine(line.Substring(match.start, match.length));
+							foreach (string beforeContextLine in beforeContext.GetLines())
+							{
+								Console.WriteLine(beforeContextLine);
+							}
+							beforeContext.Clear();
+
+							foreach (var match in matches)
+							{
+								Console.WriteLine(line.Substring(match.start, match.length));
+							}
 							matchesPattern = true;
+							remainingAfter = options.After;
 						}
+						else
+						{
+							if (remainingAfter > 0)
+							{
+								Console.WriteLine(line);
+								remainingAfter--;
+							}
+							else if (options.Before > 0)
+							{
+								beforeContext.AddLine(line);
+							}
+						}
+						
 					}
 				}
 			}
 			else
 			{
+				//  ---------- FILES ----------
 				bool multipleFiles = false;
-				if (options.Inputs.Length > 1){
+				if (options.Inputs.Length > 1)
+				{
 					multipleFiles = true;
 				}
 				foreach (var filePath in options.Inputs)
@@ -59,12 +109,28 @@ namespace SharpGrep
 						using (StreamReader reader = new StreamReader(filePath))
 						{
 							string? line;
+
+							Context beforeContext = new Context(options.Before);
+							int remainingAfter = 0;
+
 							while ((line = reader.ReadLine()) != null)
 							{
 								if (!options.OnlyMatches)
 								{
 									if (matcher.IsMatch(line))
 									{
+										foreach (string beforeContextLine in beforeContext.GetLines())
+										{
+											if (multipleFiles)
+											{
+												Console.WriteLine($"{filePath}:{beforeContextLine}");
+											}
+											else
+											{
+												Console.WriteLine(beforeContextLine);
+											}
+										}
+										beforeContext.Clear();
 										if (multipleFiles)
 										{
 											Console.WriteLine($"{filePath}:{line}");
@@ -74,23 +140,79 @@ namespace SharpGrep
 											Console.WriteLine(line);
 										}
 										matchesPattern = true;
+
+										remainingAfter = options.After;
+									}
+									else
+									{
+										if (remainingAfter > 0)
+										{
+											if (multipleFiles)
+											{
+												Console.WriteLine($"{filePath}:{line}");
+											}
+											else
+											{
+												Console.WriteLine(line);
+											}
+											remainingAfter--;
+										}
+										else if (options.Before > 0)
+										{
+											beforeContext.AddLine(line);
+										}
 									}
 								}
 								else
 								{
 									var matches = new List<(int start, int length)>();
 									matcher.CollectMatches(line, matches);
-									foreach (var match in matches)
+									if (matches.Count > 0)
 									{
-										if (multipleFiles)
+										foreach (string beforeContextLine in beforeContext.GetLines())
 										{
-											Console.WriteLine($"{filePath}:{line.Substring(match.start, match.length)}");
+											if (multipleFiles)
+											{
+												Console.WriteLine($"{filePath}:{beforeContextLine}");
+											}
+											else
+											{
+												Console.WriteLine(beforeContextLine);
+											}
 										}
-										else
+										beforeContext.Clear();
+										foreach (var match in matches)
 										{
-											Console.WriteLine(line.Substring(match.start, match.length));
+											if (multipleFiles)
+											{
+												Console.WriteLine($"{filePath}:{line.Substring(match.start, match.length)}");
+											}
+											else
+											{
+												Console.WriteLine(line.Substring(match.start, match.length));
+											}
+											matchesPattern = true;
+											remainingAfter = options.After;
 										}
-										matchesPattern = true;
+									}
+									else
+									{
+										if (remainingAfter > 0)
+										{
+											if (multipleFiles)
+											{
+												Console.WriteLine($"{filePath}:{line}");
+											}
+											else
+											{
+												Console.WriteLine(line);
+											}
+											remainingAfter--;
+										}
+										else if (options.Before > 0)
+										{
+											beforeContext.AddLine(line);
+										}
 									}
 								}
 							}
