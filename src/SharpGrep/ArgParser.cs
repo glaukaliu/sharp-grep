@@ -36,9 +36,6 @@ namespace SharpGrep
 						{
 							throw new ArgumentException("Missing or invalid number for -A option.");
 						}
-						{
-							throw new ArgumentException("Missing or invalid number for -A option.");
-						}
 						args = args[1..];
 						break;
 					case "-B":
