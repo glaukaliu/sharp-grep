@@ -9,6 +9,12 @@ namespace SharpGrep
 		public bool OnlyMatches { get; }
 		public int After { get; }
 		public int Before { get; }
+		public bool CountOnly { get; }
+		public bool ListWithMatches { get; }
+		public bool ListWithoutMatches { get; }
+		public bool Recursive { get; }
+		public int SearchStop { get; }
+
 
 		public Options(
 			string pattern,
@@ -17,7 +23,12 @@ namespace SharpGrep
 			bool wholeWord,
 			bool onlyMatches,
 			int after,
-			int before
+			int before,
+			bool countOnly,
+			bool listWithMatches,
+			bool listWithoutMatches,
+			bool recursive,
+			int searchStop
 			)
 		{
 			Pattern = pattern;
@@ -27,6 +38,11 @@ namespace SharpGrep
 			OnlyMatches = onlyMatches;
 			After = after;
 			Before = before;
+			CountOnly = countOnly;
+			ListWithMatches = listWithMatches;
+			ListWithoutMatches = listWithoutMatches;
+			Recursive = recursive;
+			SearchStop = searchStop;
 		}
 	}
 }

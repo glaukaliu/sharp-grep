@@ -2,9 +2,9 @@
 
 namespace SharpGrep
 {
-	class Program
+	public class Program
 	{
-		static int Main(string[] args)
+		public static int Main(string[] args)
 		{
 			Options options;
 			var parser = new ArgParser();
@@ -17,11 +17,13 @@ namespace SharpGrep
 				Console.WriteLine($"Argument error: {ex.Message}");
 				return ExitCodes.ArgumentError;
 			}
-			
+
 			var matcher = new RegexMatcher(options.Pattern, options.IgnoreCase, options.WholeWord);
 
 			bool matchesPattern = false;
-			
+
+			bool summaryOutput = options.CountOnly || options.ListWithMatches || options.ListWithoutMatches;
+
 			if (options.Inputs.Length == 0)
 			{
 				//  ---------- STANDARD INPUT ----------
@@ -36,27 +38,14 @@ namespace SharpGrep
 					{
 						if (matcher.IsMatch(line))
 						{
-							foreach (string beforeContextLine in beforeContext.GetLines())
-							{
-								Console.WriteLine(beforeContextLine);
-							}
-							beforeContext.Clear();
-
+							Output.PrintBeforeContext(beforeContext, null, false);
 							Console.WriteLine(line);
 							matchesPattern = true;
 							remainingAfter = options.After;
 						}
 						else
 						{
-							if (remainingAfter > 0)
-							{
-								Console.WriteLine(line);
-								remainingAfter--;
-							}
-							else if (options.Before > 0)
-							{
-								beforeContext.AddLine(line);
-							}
+							Output.HandleAfterContext(line, null, false, ref remainingAfter, beforeContext, options.Before);
 						}
 					}
 					else
@@ -65,32 +54,16 @@ namespace SharpGrep
 						matcher.CollectMatches(line, matches);
 						if (matches.Count > 0)
 						{
-							foreach (string beforeContextLine in beforeContext.GetLines())
-							{
-								Console.WriteLine(beforeContextLine);
-							}
-							beforeContext.Clear();
-
-							foreach (var match in matches)
-							{
-								Console.WriteLine(line.Substring(match.start, match.length));
-							}
+							Output.PrintBeforeContext(beforeContext, null, false);
+							Output.PrintOnlyMatches(line, matches, null, false);
 							matchesPattern = true;
 							remainingAfter = options.After;
 						}
 						else
 						{
-							if (remainingAfter > 0)
-							{
-								Console.WriteLine(line);
-								remainingAfter--;
-							}
-							else if (options.Before > 0)
-							{
-								beforeContext.AddLine(line);
-							}
+							Output.HandleAfterContext(line, null, false, ref remainingAfter, beforeContext, options.Before);
 						}
-						
+
 					}
 				}
 			}
@@ -119,48 +92,15 @@ namespace SharpGrep
 								{
 									if (matcher.IsMatch(line))
 									{
-										foreach (string beforeContextLine in beforeContext.GetLines())
-										{
-											if (multipleFiles)
-											{
-												Console.WriteLine($"{filePath}:{beforeContextLine}");
-											}
-											else
-											{
-												Console.WriteLine(beforeContextLine);
-											}
-										}
-										beforeContext.Clear();
-										if (multipleFiles)
-										{
-											Console.WriteLine($"{filePath}:{line}");
-										}
-										else
-										{
-											Console.WriteLine(line);
-										}
+										Output.PrintBeforeContext(beforeContext, filePath, multipleFiles);
+										Output.PrintLine(line, filePath, multipleFiles);
 										matchesPattern = true;
 
 										remainingAfter = options.After;
 									}
 									else
 									{
-										if (remainingAfter > 0)
-										{
-											if (multipleFiles)
-											{
-												Console.WriteLine($"{filePath}:{line}");
-											}
-											else
-											{
-												Console.WriteLine(line);
-											}
-											remainingAfter--;
-										}
-										else if (options.Before > 0)
-										{
-											beforeContext.AddLine(line);
-										}
+										Output.HandleAfterContext(line, filePath, multipleFiles, ref remainingAfter, beforeContext, options.Before);
 									}
 								}
 								else
@@ -169,50 +109,14 @@ namespace SharpGrep
 									matcher.CollectMatches(line, matches);
 									if (matches.Count > 0)
 									{
-										foreach (string beforeContextLine in beforeContext.GetLines())
-										{
-											if (multipleFiles)
-											{
-												Console.WriteLine($"{filePath}:{beforeContextLine}");
-											}
-											else
-											{
-												Console.WriteLine(beforeContextLine);
-											}
-										}
-										beforeContext.Clear();
-										foreach (var match in matches)
-										{
-											if (multipleFiles)
-											{
-												Console.WriteLine($"{filePath}:{line.Substring(match.start, match.length)}");
-											}
-											else
-											{
-												Console.WriteLine(line.Substring(match.start, match.length));
-											}
-											matchesPattern = true;
-											remainingAfter = options.After;
-										}
+										Output.PrintBeforeContext(beforeContext, filePath, multipleFiles);
+										Output.PrintOnlyMatches(line, matches, filePath, multipleFiles);
+										matchesPattern = true;
+										remainingAfter = options.After;
 									}
 									else
 									{
-										if (remainingAfter > 0)
-										{
-											if (multipleFiles)
-											{
-												Console.WriteLine($"{filePath}:{line}");
-											}
-											else
-											{
-												Console.WriteLine(line);
-											}
-											remainingAfter--;
-										}
-										else if (options.Before > 0)
-										{
-											beforeContext.AddLine(line);
-										}
+										Output.HandleAfterContext(line, filePath, multipleFiles, ref remainingAfter, beforeContext, options.Before);
 									}
 								}
 							}
@@ -226,7 +130,7 @@ namespace SharpGrep
 					}
 				}
 			}
-			return matchesPattern? ExitCodes.Success : ExitCodes.NoMatchesFound;
+			return matchesPattern ? ExitCodes.Success : ExitCodes.NoMatchesFound;
 		}
 	}
 }	
