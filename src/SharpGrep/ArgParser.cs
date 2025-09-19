@@ -4,14 +4,121 @@ namespace SharpGrep
 	{
 		public Options ParseArgs(string[] args)
 		{
-			string pattern = args[0];
-			string? file = null;
-			if (args.Length > 1)
-			{
-				file = args[1];
 
+			if (args.Length == 0)
+			{
+				throw new ArgumentException("No arguments provided.");
 			}
-			return new Options(pattern, file);
+
+			bool ignoreCase = false;
+			bool wholeWord = false;
+			bool onlyMatches = false;
+			int after = 0;
+			int before = 0;
+			bool countOnly = false;
+			bool listWithMatches = false;
+			bool listWithoutMatches = false;
+			bool recursive = false;
+			int searchStop = 0;
+
+			while (args.Length > 0 && args[0].StartsWith("-"))
+			{
+				string option = args[0];
+				args = args[1..];
+				switch (option)
+				{
+					case "-i":
+						ignoreCase = true;
+						break;
+					case "-w":
+						wholeWord = true;
+						break;
+					case "-o":
+						onlyMatches = true;
+						break;
+					case "-c":
+						countOnly = true;
+						break;
+					case "-l":
+						listWithMatches = true;
+						break;
+					case "-L":
+						listWithoutMatches = true;
+						break;
+					case "-r":
+						recursive = true;
+						break;
+					case "-A":
+						if (args.Length == 0 || !int.TryParse(args[0], out after) || after < 0)
+						{
+							throw new ArgumentException("Missing or invalid number for -A option.");
+						}
+						args = args[1..];
+						break;
+					case "-B":
+						if (args.Length == 0 || !int.TryParse(args[0], out before) || before < 0)
+						{
+							throw new ArgumentException("Missing or invalid number for -B option.");
+						}
+						args = args[1..];
+						break;
+					case "-C":
+						if (args.Length == 0 || !int.TryParse(args[0], out int context) || context < 0)
+						{
+							throw new ArgumentException("Missing or invalid number for -C option.");
+						}
+						after = context;
+						before = context;
+						args = args[1..];
+						break;
+					case "-m":
+						if (args.Length == 0 || !int.TryParse(args[0], out searchStop) || searchStop <= 0)
+						{
+							throw new ArgumentException("Missing or invalid number for -m option.");
+						}
+						args = args[1..];
+						break;
+					default:
+						throw new ArgumentException($"Unknown option: {option}");
+				}
+			}
+			
+			if (args.Length == 0)
+			{
+				throw new ArgumentException("No pattern provided.");
+			}
+
+			if (listWithMatches && listWithoutMatches)
+			{
+				throw new ArgumentException("Options -l and -L cannot be used together.");
+			}
+			if (countOnly && (listWithMatches || listWithoutMatches))
+			{
+				throw new ArgumentException("Option -c cannot be used with -l or -L.");
+			}
+
+			string pattern = args[0];
+			int nfiles = args.Length - 1;
+			string[] files = new string[nfiles];
+			for (int i = 0; i < nfiles; i++)
+			{
+				files[i] = args[i + 1];
+			}
+
+			return new Options(
+				pattern,
+				files,
+				ignoreCase,
+				wholeWord,
+				onlyMatches,
+				after,
+				before,
+				countOnly,
+                listWithMatches,
+                listWithoutMatches,
+				recursive,
+				searchStop
+				);
 
 		}
 	}
