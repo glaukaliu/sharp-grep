@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace SharpGrep
 {
@@ -34,6 +35,12 @@ namespace SharpGrep
 			{
 				matches.Add((match.Index, match.Length));
 			}
+		}
+		public bool IsBinaryFileMatch(string filePath)
+		{
+			byte[] data = File.ReadAllBytes(filePath);
+			string text = Encoding.Latin1.GetString(data);
+			return regex.IsMatch(text);
 		}
 	}
 }
