@@ -6,7 +6,7 @@ namespace SharpGrep
     public static class BinaryDetector
     {
         private const int SampleSize = 8192;
-        private const double ControlMaxRatio = 0.01;  // >2% controls => binary
+        private const double ControlMaxRatio = 0.01;  // >1% controls => binary
 
         // True = probably binary, False = looks like text
         public static bool IsProbablyBinary(string filePath)
