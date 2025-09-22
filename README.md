@@ -56,6 +56,7 @@ dotnet test
 ```
 
 ### Basic examples
+replace `shgrep` with `dotnet run --project src/SharpGrep`
 ```bash
 # stdin
 echo "Hello cat" | shgrep cat
