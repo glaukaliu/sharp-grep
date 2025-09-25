@@ -6,23 +6,6 @@ namespace SharpGrep
 	/// </summary>
 	public class ArgParser
 	{
-		public static string HelpText =
-			"""
-			usage: sharpgrep [OPTIONS] PATTERN [FILE...]
-			options:
-			-i            Ignore case distinctions
-			-w            Match whole words only
-			-o            Print only the matched parts of a line
-			-A N	      Print N lines of context AFTER matching lines
-			-B N    	  Print N lines of context BEFORE matching lines
-			-C NU         Print N lines of context BEFORE and AFTER matching lines
-			-c            Print only a count of matching lines per file
-			-l            Print only names of files with matches
-			-L            Print only names of files without matches
-			-r            Recursively search directories
-			-m N          Stop reading a file after N matching lines
-			-h, --help    Show this help message and exit
-			""";
 		public Options ParseArgs(string[] args)
 		{
 
@@ -41,6 +24,7 @@ namespace SharpGrep
 			bool listWithoutMatches = false;    //-L
 			bool recursive = false;             //-r	
 			int searchStop = 0;                 //-m
+			ColorMode color = ColorMode.Auto;   //--color
 
 			// Parse options
 			// Remove the parsed options from args for each iteration
@@ -106,9 +90,28 @@ namespace SharpGrep
 						}
 						args = args[1..];
 						break;
+                    case "--color":
+                    case "--color=auto":
+						// Default behavior
+                        color = ColorMode.Auto;
+                        break;
+                    case "--color=never":
+						// Disable color
+                        color = ColorMode.Never;
+                        break;
+                    case "--color=always":
+						// Always use color
+                        color = ColorMode.Always;
+                        break;
 					case "-h":
 					case "--help":
+						// Show help information
 						throw new HelpRequestedException();
+					case "--man":
+						// Show full manual
+						throw new ManualRequestedException();
+						break;
+
 					default:
 						throw new ArgumentException($"Unknown option: {option}");
 				}
@@ -150,7 +153,8 @@ namespace SharpGrep
 				listWithMatches,
 				listWithoutMatches,
 				recursive,
-				searchStop
+				searchStop,
+				color
 				);
 
 		}

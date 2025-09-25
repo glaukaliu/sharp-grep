@@ -1,5 +1,12 @@
 namespace SharpGrep
 {
+	/// <summary>
+	/// Defines exit codes used by the application.
+	/// Success = 0
+	/// NoMatchesFound = 1
+	/// ArgumentError = 2
+	/// FileError = 3
+	/// </summary>
 	public class ExitCodes
 	{
 		public const int Success = 0;

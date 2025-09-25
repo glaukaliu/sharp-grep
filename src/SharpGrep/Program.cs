@@ -19,7 +19,12 @@ namespace SharpGrep
 			}
 			catch (HelpRequestedException)
 			{
-				Console.WriteLine(ArgParser.HelpText);
+				Console.WriteLine(PrintMessages.HelpText);
+				return ExitCodes.ArgumentError;
+			}
+			catch (ManualRequestedException)
+			{
+				Console.WriteLine(PrintMessages.ManualText);
 				return ExitCodes.ArgumentError;
 			}
 			catch (ArgumentException ex)
@@ -27,6 +32,7 @@ namespace SharpGrep
 				Console.WriteLine($"Argument error: {ex.Message}");
 				return ExitCodes.ArgumentError;
 			}
+
 
 			var matcher = new RegexMatcher(options.Pattern, options.IgnoreCase, options.WholeWord);
 

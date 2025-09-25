@@ -10,6 +10,14 @@ namespace SharpGrep
     /// </summary>
     public sealed class NormalPrint
     {
+        private static bool ShouldColorize(ColorMode mode)
+        {
+            if (mode == ColorMode.Always) return true;
+            if (mode == ColorMode.Never)  return false;
+            // Auto mode:
+            return !Console.IsOutputRedirected;
+        }
+
         public int Run(Options options, RegexMatcher matcher)
         {
             bool matchesPattern = false;
@@ -25,6 +33,8 @@ namespace SharpGrep
                 int m = options.SearchStop;
                 int matchCount = 0;
 
+                bool colorOn = ShouldColorize(options.Color);
+
 
                 while ((line = Console.In.ReadLine()) != null)
                 {
@@ -39,7 +49,17 @@ namespace SharpGrep
                                 break;
                             }
                             Output.PrintBeforeContext(beforeContext, null, false);
-                            Console.WriteLine(line);
+                            if (colorOn)
+                            {
+                                var spans = new List<(int start, int length)>();
+                                matcher.CollectMatches(line, spans);
+                                string colored = Output.BuildColoredLine(line, spans);
+                                Console.WriteLine(colored);
+                            }
+                            else
+                            {
+                                Console.WriteLine(line);
+                            }
                             matchesPattern = true;
                             remainingAfter = options.After;
                         }
@@ -64,7 +84,12 @@ namespace SharpGrep
                                 break;
                             }
                             Output.PrintBeforeContext(beforeContext, null, false);
-                            Output.PrintOnlyMatches(line, matches, null, false);
+                            if (colorOn)
+                                Output.PrintOnlyMatchesColored(line, matches, null, false);
+                            else
+                            {
+                                Output.PrintOnlyMatches(line, matches, null, false);
+                            }
                             matchesPattern = true;
                             remainingAfter = options.After;
                         }
@@ -88,6 +113,8 @@ namespace SharpGrep
                     Console.WriteLine($"Error: {errorMessage}");
                     return ExitCodes.ArgumentError;
                 }
+
+                bool colorOn = ShouldColorize(options.Color);
 
                 // Process each file
                 foreach (var filePath in files)
@@ -127,7 +154,17 @@ namespace SharpGrep
                                             break;
                                         }
                                         Output.PrintBeforeContext(beforeContext, filePath, multipleFiles);
-                                        Output.PrintLine(line, filePath, multipleFiles);
+                                        if (colorOn)
+                                        {
+                                            var spans = new List<(int start, int length)>();
+                                            matcher.CollectMatches(line, spans);
+                                            string colored = Output.BuildColoredLine(line, spans);
+                                            Output.PrintLine(colored, filePath, multipleFiles);
+                                        }
+                                        else
+                                        {
+                                            Output.PrintLine(line, filePath, multipleFiles);
+                                        }
                                         matchesPattern = true;
 
                                         remainingAfter = options.After;
@@ -151,7 +188,12 @@ namespace SharpGrep
                                             break;
                                         }
                                         Output.PrintBeforeContext(beforeContext, filePath, multipleFiles);
-                                        Output.PrintOnlyMatches(line, matches, filePath, multipleFiles);
+                                        if (colorOn)
+                                            Output.PrintOnlyMatchesColored(line, matches, filePath, multipleFiles);
+                                        else
+                                        {
+                                            Output.PrintOnlyMatches(line, matches, filePath, multipleFiles);
+                                        }   
                                         matchesPattern = true;
                                         remainingAfter = options.After;
                                     }

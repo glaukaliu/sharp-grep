@@ -1,19 +1,23 @@
 namespace SharpGrep
 {
+	/// <summary>
+	/// Holds all parsed command-line options.
+	/// </summary>
 	public class Options
 	{
-		public string Pattern { get;}
-		public string[] Inputs { get; }
-		public bool IgnoreCase { get; }
-        public bool WholeWord { get; }
-		public bool OnlyMatches { get; }
-		public int After { get; }
-		public int Before { get; }
-		public bool CountOnly { get; }
-		public bool ListWithMatches { get; }
-		public bool ListWithoutMatches { get; }
-		public bool Recursive { get; }
-		public int SearchStop { get; }
+		public string Pattern { get;}				
+		public string[] Inputs { get; }					
+		public bool IgnoreCase { get; }             	//-i
+        public bool WholeWord { get; }					//-w
+		public bool OnlyMatches { get; }				//-o
+		public int After { get; }						//-A
+		public int Before { get; }						//-B
+		public bool CountOnly { get; }					//-c
+		public bool ListWithMatches { get; }			//-l
+		public bool ListWithoutMatches { get; }			//-L
+		public bool Recursive { get; }					//-r
+		public int SearchStop { get; }                  //-s
+		public ColorMode Color { get; }					//--color		
 
 
 		public Options(
@@ -28,7 +32,8 @@ namespace SharpGrep
 			bool listWithMatches,
 			bool listWithoutMatches,
 			bool recursive,
-			int searchStop
+			int searchStop,
+			ColorMode color
 			)
 		{
 			Pattern = pattern;
@@ -43,6 +48,7 @@ namespace SharpGrep
 			ListWithoutMatches = listWithoutMatches;
 			Recursive = recursive;
 			SearchStop = searchStop;
+			Color = color;  
 		}
 	}
 }

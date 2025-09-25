@@ -3,6 +3,12 @@ using System.Text;
 
 namespace SharpGrep
 {
+	/// <summary>
+	/// Encapsulates regex matching logic.
+	/// Handles options like ignore case and whole word.
+	/// Provides methods to check if a line matches, and to find all matches in a line
+	/// Also provides method to check if a binary file matches the pattern.
+	/// </summary>
 	public class RegexMatcher
 	{
 		private Regex regex;
