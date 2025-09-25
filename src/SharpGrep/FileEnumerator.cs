@@ -4,6 +4,10 @@ using System.IO;
 
 namespace SharpGrep
 {
+    /// <summary>
+    /// Expands input paths (files and directories) into a list of files to search.
+    /// Handles the -r (recursive) option for directories.
+    /// </summary>
     public static class FileEnumerator
     {
         public static bool TryExpandInputs(

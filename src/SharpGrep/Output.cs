@@ -1,7 +1,13 @@
 namespace SharpGrep
 {
+	/// <summary>
+	/// Handles all output printing logic.
+	/// </summary>
 	public class Output
 	{
+		// ANSI sequences for red text
+		private const string AnsiStart = "\u001b[1;31m";
+        private const string AnsiEnd   = "\u001b[0m";
 		//Prints a line, in case of multiple files, specifies the file.
 		public static void PrintLine(string line, string? filePath, bool multipleFiles)
 		{
@@ -29,6 +35,16 @@ namespace SharpGrep
 				PrintLine(matchToPrint, filePath, multipleFiles);
 			}
 		}
+
+		public static void PrintOnlyMatchesColored(string line, List<(int start, int length)> matches, string? filePath, bool multipleFiles)
+        {
+            for (int i = 0; i < matches.Count; i++)
+            {
+                var m = matches[i];
+                string frag = line.Substring(m.start, m.length);
+                PrintLine(AnsiStart + frag + AnsiEnd, filePath, multipleFiles);
+            }
+        }
 
 		// Handles after-context logic.
 		// If it has remaining after lines, prints and decrements remainingAFter, else adds to beforeContext, if larger than 0.
@@ -58,5 +74,32 @@ namespace SharpGrep
 		{
 			Console.WriteLine("Binary file " + filePath + " matches");
 		}
+		// Builds a colored line for output.
+		public static string BuildColoredLine(string line, List<(int start, int length)> spans)
+        {
+            if (spans.Count == 0) return line;
+
+            var sb = new System.Text.StringBuilder(line.Length + spans.Count * 10);
+            int pos = 0;
+
+            for (int i = 0; i < spans.Count; i++)
+            {
+                int s = spans[i].start;
+                int len = spans[i].length;
+
+                if (s > pos)
+                    sb.Append(line.Substring(pos, s - pos));
+
+                sb.Append(AnsiStart);
+                sb.Append(line.Substring(s, len));
+                sb.Append(AnsiEnd);
+
+                pos = s + len;
+            }
+            if (pos < line.Length)
+                sb.Append(line.Substring(pos));
+
+            return sb.ToString();
+        }
 	}
 }

@@ -3,6 +3,11 @@ using System.IO;
 
 namespace SharpGrep
 {
+    /// <summary>
+    /// Detects whether a file is likely to be a binary file.
+    /// Uses a heuristic based on the presence of NUL bytes and the ratio of control characters.
+    /// Returns true if the file is probably binary, false if it looks like text.
+    /// </summary>
     public static class BinaryDetector
     {
         private const int SampleSize = 8192;

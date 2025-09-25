@@ -1,6 +1,10 @@
 
 namespace SharpGrep
 {
+	/// <summary>
+	/// Holds lines of context before a matching line, up to a specified capacity.
+	/// Used to implement the -B and -C options.
+	/// </summary>
 	public class Context
 	{
 		private Queue<string> beforeContext;
