@@ -15,7 +15,8 @@
 - **Recursive search:** recursive directory search (`-r`).
 - **Early stop:** stop after N matching lines per file (`-m N`).
 - **Binary detector:** detect likely binary files (NUL-byte heuristic) and print `Binary file <path> matches`.
-- **Usability:** help (`-h`, `--help`).
+- **Colored matches:** print matches as red text. (`--color`).
+- **Usability:** help (`-h`, `--help`), manual (`--color`).
 
 ---
 ## User Guide
@@ -52,7 +53,10 @@ dotnet test
 -L            Print only names of files without matches
 -r            Recursively search directories
 -m N          Stop reading a file after N matching lines
--h, --help    Show this help message and exit
+--color           Print matches in color, can be used as --color=always, --color=never, --color
+
+-h, --help    Show help message and exit
+--man         Show the manual page
 ```
 
 ### Basic examples
@@ -72,6 +76,8 @@ shgrep -c cat src/*
 shgrep -r cat files
 # stop after first match
 shgrep -m 1 cat file.txt
+#print colored matches
+shgrep --color cat file.txt
 ```
 
 
